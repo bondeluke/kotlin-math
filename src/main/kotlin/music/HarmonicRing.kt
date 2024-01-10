@@ -6,7 +6,6 @@ import math.primes
 import theIntervals
 import java.lang.StringBuilder
 import kotlin.math.max
-import kotlin.math.pow
 
 data class ChordAndSubChords(val chord: Chord, val subChords: List<Chord>)
 
@@ -106,10 +105,3 @@ private fun haveAllButOneFactorInCommon(c1: Chord, c2: Chord): Boolean {
     return c1.ratioSet.values.intersect(c2.ratioSet.values).size == (c1.size - 1)
 }
 
-fun canonicalRingOrdering(intervalSet: List<Int>): List<Int> {
-    return (intervalSet.indices).map {
-        intervalSet.takeLast(intervalSet.size - it) + intervalSet.take(it)
-    }.maxByOrNull {
-        it.foldIndexed(1F, { index, acc, value -> 12F.pow(intervalSet.size - index - 1) * value + acc })
-    } ?: throw Exception("The interval set $intervalSet did not have a maximum.")
-}

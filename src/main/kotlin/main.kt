@@ -1,88 +1,48 @@
+import functions.*
 import math.*
-import music.*
 import sets.subsets
 
-// Chords + Scales in every key
-data class NoteSet(val elements: Set<Int>, val order: Int) {
-    override fun toString(): String {
-        return "{${elements.joinToString()}}"
-    }
-
-    fun getShape(): Shape {
-        if (elements.isEmpty()) return Shape(emptyList(), order)
-
-        val sorted = elements.toList().sorted()
-        return (0 until sorted.size - 1).map {
-            sorted[it + 1] - sorted[it]
-        }.plus(order + sorted.first() - sorted.last())
-            .let { Shape(canonicalRingOrdering(it), order) }
-    }
-}
-
-
-// All chord and scale shapes
-data class Shape(val elements: List<Int>, val order: Int) {
-    override fun toString(): String {
-        return "(${elements.joinToString()})"
-    }
-
-    fun mirror(): Shape {
-        return Shape(canonicalRingOrdering(elements.reversed()), order)
-    }
-}
-
 fun main() {
-    println("seed -> binary -> bracelets -> mirrorlet")
+    println("seed -> elements -> necklaces -> bracelets")
 
-    for (seed in 3..12) {
-        val noteSets = seed.subsets()
-            .map { NoteSet(it, seed) }
-            .sortedBy { it.elements.size }
+    for (seed in 6..12) {
+        val elements = seed.subsets()
+            .map { Element(it, seed) }
+            .sortedBy { it.set.size }
 
-        val shapes = noteSets.groupBy { it.getShape() }
+        val necklaces = elements.groupBy { it.getNecklace() }
 
-        val groups = shapes.map { it.key }
+        val bracelets = necklaces.map { it.key }
             .groupBy { it.elements.size }.entries
             .map { Pair(it.key, groupsOfMirrorPairs(it.value).sortedBy { g -> g.size }) }
             .toMap()
 
-//        val x = groups.entries.drop(groups.size / 2).sumBy { it.value.size }
-
-        println("$seed -> ${noteSets.size} -> ${shapes.size} -> ${groups.entries.sumBy { it.value.size }}")
-//        for (group in groups) {
-//            println("${group.key} -> ${group.value.size}")
-//            for (set in group.value) {
-//                if (set.size == 1)
-//                    println("${set.first()}")
-//                else
-//                    println(set.joinToString(" <---> "))
-//            }
-//        }
+        println("$seed -> ${elements.size} -> ${necklaces.size} -> ${bracelets.entries.sumBy { it.value.size }}")
     }
 }
 
 
-fun groupsOfMirrorPairs(shapes: List<Shape>): List<List<Shape>> {
-    val bag = shapes.toMutableList()
+fun groupsOfMirrorPairs(necklaces: List<Necklace>): List<List<Necklace>> {
+    val bag = necklaces.toMutableList()
 
-    val groups = mutableListOf<MutableList<Shape>>()
+    val groups = mutableListOf<MutableList<Necklace>>()
 
     while (bag.isNotEmpty()) {
-        val shape = bag.first()
-        bag.remove(shape)
+        val necklace = bag.first()
+        bag.remove(necklace)
 
         var found = false
         for (group in groups) {
-            val match = group.any { it == shape.mirror() }
+            val match = group.any { it == necklace.mirror() }
 
             if (match) {
-                group.add(shape)
+                group.add(necklace)
                 found = true
             }
         }
 
         if (!found) {
-            groups.add(mutableListOf(shape))
+            groups.add(mutableListOf(necklace))
         }
     }
 

@@ -1,6 +1,11 @@
+package functions
+
+import canonicalNecklaceOrdering
+import hasNoPrimesOver
 import math.RatioSet
 import math.factorsOf
 import music.*
+import theHealthyIntervals
 
 fun printIntervals() {
     print(theHealthyIntervals.groupBy { it.shortName() }.map { it.value.count() }.reduce { x, y -> x * y })
@@ -15,7 +20,7 @@ fun printIntervals() {
 
 fun findRings(chords: List<Chord>) {
     chords.filter { it.notes.last().value == 12 } // Introduce octave redundancy
-        .groupBy { canonicalRingOrdering(it.intervals.map { i -> i.semitones }) }
+        .groupBy { canonicalNecklaceOrdering(it.intervals.map { i -> i.semitones }) }
         .map { HarmonicRing(it.key, it.value) }
         .sortedBy { it.minimumPeriod }
         .groupBy { it.size }
